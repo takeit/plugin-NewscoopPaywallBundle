@@ -21,6 +21,9 @@ paywall:
       editcurrency: "Edit currency"
       removeitem: "Are you sure you want to delete this item?"
       confirmation: "Confirmation"
+      paid: "Paid article?"
+      yes: "Yes"
+      no: "No"
       currency:
         create: "You can add any currency you wish to the system. Exchange rates must be positive numbers and will be rounded to five decimal places by default. Both the comma and period can be used as decimal separators."
     alert:

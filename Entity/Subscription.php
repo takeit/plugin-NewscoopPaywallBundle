@@ -5,7 +5,6 @@
  * @copyright 2013 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -41,7 +40,7 @@ class Subscription implements Translatable, PriceableInterface
     protected $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="SubscriptionSpecification", mappedBy="subscription")
+     * @ORM\OneToMany(targetEntity="SubscriptionSpecification", mappedBy="subscription", cascade={"persist", "remove"})
      *
      * @var array
      */
@@ -121,13 +120,20 @@ class Subscription implements Translatable, PriceableInterface
      */
     public $locale;
 
-    public function __construct()
+    public function __construct($name = null, $type = null, $price = null, $currency = null, $duration = null)
     {
         $this->specification = new ArrayCollection();
         $this->setCreatedAt(new \DateTime());
         $this->setIsActive(true);
         $this->ranges = new ArrayCollection();
         $this->translations = new ArrayCollection();
+        $this->name = $name;
+        $this->type = $type;
+        $this->price = $price;
+        $this->currency = $currency;
+        if ($duration) {
+            $this->addRange($duration);
+        }
     }
 
     /**
@@ -405,6 +411,20 @@ class Subscription implements Translatable, PriceableInterface
         if (!$this->translations->contains($translation)) {
             $this->translations[] = $translation;
             $translation->setObject($this);
+        }
+    }
+
+    /**
+     * Adds Subscription specification.
+     *
+     * @param SubscriptionSpecification $spec SubscriptionSpecification to add
+     *
+     * @return SubscriptionSpecification
+     */
+    public function addSpecification(SubscriptionSpecification $spec)
+    {
+        if (!$this->specification->contains($spec)) {
+            $this->specification->add($spec);
         }
     }
 }

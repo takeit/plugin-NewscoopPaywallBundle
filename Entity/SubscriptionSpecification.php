@@ -5,11 +5,9 @@
  * @copyright 2013 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Subscription Specification entity.
@@ -78,11 +76,15 @@ class SubscriptionSpecification
      */
     protected $is_active;
 
-    public function __construct()
+    public function __construct(Subscription $subscription = null, $publication = null, $issue = null, $section = null, $article = null)
     {
         $this->setCreatedAt(new \DateTime());
         $this->setIsActive(true);
-        $this->subscription = new ArrayCollection();
+        $this->subscription = $subscription;
+        $this->publication = $publication;
+        $this->issue = $issue;
+        $this->section = $section;
+        $this->article = $article;
     }
 
     /**

@@ -5,7 +5,6 @@
  * @copyright 2015 Sourcefabric z.ú.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Entity\Repository;
 
 use Newscoop\ListResult;
@@ -88,5 +87,23 @@ class SubscriptionRepository extends TranslationRepository
     public function getReference($id)
     {
         return $this->getEntityManager()->getReference($this->getEntityName(), $id);
+    }
+
+    public function getOneSubscription($articleNumber, $name)
+    {
+        $query = $this
+            ->createQueryBuilder('s')
+            ->leftJoin('s.specification', 'sp')
+            ->where('s.name = :name')
+            ->andWhere('s.is_active = true')
+            ->andWhere('sp.article = :articleNumber')
+            ->setParameters(array(
+                'articleNumber' => $articleNumber,
+                'name' => $name,
+            ))
+            ->getQuery()
+        ;
+
+        return $query->getOneOrNullResult();
     }
 }

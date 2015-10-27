@@ -156,6 +156,15 @@ services:
             - @paywall.subscription.service
             - @newscoop_paywall.processor.discounts
 
+    newscoop_paywall.hooks.listener:
+        class: Newscoop\PaywallBundle\EventListener\HookListener
+        arguments: ["@service_container"]
+        tags:
+          - { name: kernel.event_listener, event: newscoop_admin.interface.article.edit.sidebar, method: sidebar }
+
+    newscoop_paywall.subscription.factory:
+        class: Newscoop\PaywallBundle\Subscription\SubscriptionFactory
+
     newscoop_paywall.notification_listener:
         class: %newscoop.paywall.listener.notification.class%
         arguments:

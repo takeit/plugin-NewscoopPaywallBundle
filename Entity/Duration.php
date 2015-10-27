@@ -5,7 +5,6 @@
  * @copyright 2015 Sourcefabric z.ú.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -59,6 +58,20 @@ class Duration
      * @var Discount
      */
     protected $discount;
+
+    public function __construct(
+        Subscription $subscription = null,
+        Discount $discount = null,
+        $value = null,
+        $attribute = null
+    ) {
+        $this->subscription = $subscription;
+        $this->value = $value;
+        $this->discount = $discount;
+        if ($attribute) {
+            $this->attribute = $attribute;
+        }
+    }
 
     /**
      * Gets the value of id.

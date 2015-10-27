@@ -1,0 +1,137 @@
+<style type="text/css" media="screen">
+	.hook-content {font-size: 12px;}
+	.hook-content .save-button {display: block;float: right;}
+	.hook-content h4{margin-bottom: 0px; padding: 5px 0;margin-top: 15px;}
+	.form-group label {font-weight: bold;}
+	.hook-content .hook-currency { line-height: 25px; padding-left: 5px;}
+	.js-paywall-status {padding: 5px 0;}
+	.js-paywall-status-yes {color: #468847;}
+	.js-paywall-status-no {color: #b94a48;}
+	.hook-content #paywallpluginForm .input_text {width: 50%;}
+</style>
+{% form_theme form 'NewscoopPaywallBundle::forms.html.twig' %}
+<div class="articlebox paywallplugin" title="Paywall - {{ 'paywall.label.paid'|trans}}">
+    <div class="hook-content">
+    <div id="alert-container" style="display: none; padding: 15px;" class="alert-{% if success %}success{% else %}danger{% endif %}" role="alert">
+    	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	    {% if success %}
+	    	<span class="sr-only">Success:</span>
+	    	Subscription has been saved successfully.
+	    {% else %}
+	    	<span class="sr-only">Error:</span>
+	    	Subscription could not be saved.
+	    {% endif %}
+	    <br>
+    </div>
+	<div class="js-paywall-status"><strong>{{ 'paywall.label.paid'|trans }}: </strong>
+	    {% if subscription %}
+	        <span class="js-paywall-status-yes">{{ 'paywall.label.yes'|trans }}</span>
+	    {% else %}
+	        <span class="js-paywall-status-no">{{ 'paywall.label.no'|trans }}</span>
+	    {% endif %}
+	</div>
+    <form id="paywallpluginForm" action="{{ path('newscoop_paywall_hook_sidebar', {articleNumber: articleNumber, articleLanguage: articleLanguage}) }}" method="POST" novalidate>
+    	<h4>Price</h4>
+    	{{ form_widget(form.price, {'attr' : {'class' : 'input_text'}}) }} <span class="hook-currency">{{ currency}}</span>
+    	{% if subscription %}
+    		{{ form_widget(form.saveSubmit, {'attr' : {'class' : 'save-button paywall-button'}, 'label': 'paywall.btn.save'|trans }) }}
+    	{% endif %}
+    	<hr>
+    	<h4>Duration:</h4>
+    	{{ form_widget(form.duration.value, {'attr' : {'class' : 'input_text'}}) }}
+    	{{ form_widget(form.duration.attribute, {'attr' : {'class' : 'input_select'}}) }}
+    	<h4>Discount:</h4>
+    	{{ form_widget(form.duration.discount, {'attr' : {'class' : 'input_select'}}) }}
+        {{ form_widget(form.saveAndAdd, {'attr' : {'class' : 'save-button paywall-button'}, 'label': 'paywall.btn.add'|trans }) }}
+        {{ form_rest(form) }}
+    </form>
+    {% if subscription and subscription.ranges|length > 0 %}
+    	<hr>
+        <table id="durationTable" style="width:100%" class="table">
+									<thead>
+										<tr>
+											<th>{{ 'paywall.step2.label.durationbox'|trans }}</th>
+											<th>{{ 'paywall.label.discount'|trans }}</th>
+											<th>{{ 'paywall.manage.label.options'|trans }}</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for range in subscription.ranges %}
+										<tr id="{{ range.id }}">
+											<td>{{ range.value }}{% if range.attribute == 'month' %} {{ 'paywall.label.months'|trans }} {% endif %}</td>
+											<td>{% if range.discount %} {{ range.discount.name}} ({{ range.discount.value * 100 }}%){% else %} - {% endif %}</td>
+											<td><center><button title="{{ 'paywall.btn.delete'|trans }}" type="button" id="remove-duration" data-path="{{ path('newscoop_paywall_admin_duration_remove', {'id': range.id }) }}" class="btn btn-xs btn-danger">
+												<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+											</button></center></td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+	{% endif %}
+    </div>
+</div>
+<script>
+/*$('#paywallpluginForm').one('submit', function(e){
+    e.preventDefault();
+    $.ajax({
+        type: $(this).attr('method'),
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        dataType: "html",
+        success: function(msg){
+            $('.paywallplugin .hook-content').html(msg);
+            $('#alert-container').show();
+        }
+    });
+});*/
+$('.paywall-button').one('click', function(e){
+	e.preventDefault();
+	$(this).prop('disabled', true);
+	var form = $('#paywallpluginForm');
+	var btn = '&'+$(this).attr('name')+'='+$(this).val();
+	var data = form.serialize();
+    $.ajax({
+        type: form.attr('method'),
+        url: form.attr('action'),
+        data: data+btn,
+        dataType: "html",
+        success: function(msg){
+        	$(this).prop('disabled', false);
+            $('.paywallplugin .hook-content').html(msg);
+            $('#alert-container').show();
+        }
+    });
+});
+$('#remove-duration').live('click', function () {
+		var that = $(this);
+		var ranges = 0;
+		{% if subscription %}
+			ranges = {{ subscription.ranges|length }}
+		{% endif %}
+		callServer('ping', [], function(json) {
+			$.ajax({
+				type: 'POST',
+				url: that.data('path'),
+				success: function (data) {
+					if (data.status) {
+						if (ranges === 0) {
+							$('#durationTable').remove();
+						} else {
+							that.parent().parent().parent().remove();
+						}
+						flashMessage('{{ 'paywall.success.removed'|trans }}');
+					} else {
+						flashMessage(data.message, "error");
+					}
+				},
+				error: function (rq, status, error) {
+					if (status == 0 || status == -1) {
+						flashMessage('Error occured!', "error");
+					}
+				}
+			});
+		});
+
+		return false;
+	});
+</script>

@@ -5,7 +5,6 @@
  * @copyright 2014 Sourcefabric z.ú.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Services;
 
 use Newscoop\Services\EmailService;
@@ -192,8 +191,9 @@ class NotificationsService
      * Processes expiring subscriptions and sends email
      * notifications to users.
      *
-     * @param \DateTime $now                Current date time
-     * @param int       $subscriptionsCount Subscriptions count
+     * @param \DateTime $now Current date time
+     * @param int How many days before, the notification will be send
+     * @param int $count Subscriptions count
      */
     public function processExpiringSubscriptions($now, $notify, $count = 0, $days = 7)
     {
