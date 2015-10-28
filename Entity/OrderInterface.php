@@ -5,7 +5,6 @@
  * @copyright 2015 Sourcefabric z.ú.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Entity;
 
 use Doctrine\Common\Collections\Collection;
@@ -41,21 +40,21 @@ interface OrderInterface extends DiscountableInterface
     /**
      * Adds item to order.
      *
-     * @param OrderItemInterface $item
+     * @param UserSubscription $item
      */
     public function addItem($item);
 
     /**
      * Remove item from order.
      *
-     * @param OrderItemInterface $item
+     * @param UserSubscription $item
      */
     public function removeItem($item);
 
     /**
      * Has order item.
      *
-     * @param OrderItemInterface $item
+     * @param UserSubscription $item
      *
      * @return bool
      */

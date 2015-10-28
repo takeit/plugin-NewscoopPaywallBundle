@@ -5,7 +5,6 @@
  * @copyright 2012 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Adapter;
 
 use Newscoop\Services\SubscriptionService;
@@ -28,7 +27,7 @@ class PaypalAdapter implements PaywallAdapterInterface
         $this->subscriptionService = $subscriptionService;
     }
 
-    public function proccess()
+    public function process()
     {
         $request = new \PayPal\Ipn\Request\Curl();
         $listener = new \PayPal\Ipn\Listener($request);

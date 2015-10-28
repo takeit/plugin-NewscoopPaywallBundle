@@ -5,7 +5,6 @@
  * @copyright 2012 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
 namespace Newscoop\PaywallBundle\Adapter;
 
 use Newscoop\PaywallBundle\Services\PaywallService;
@@ -28,7 +27,7 @@ interface PaywallAdapterInterface
      *
      * @return Response
      */
-    public function proccess($params = array());
+    public function process($params = array());
 
     /**
      * Set request to process.

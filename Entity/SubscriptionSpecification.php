@@ -30,7 +30,7 @@ class SubscriptionSpecification
      * @ORM\ManyToOne(targetEntity="Newscoop\PaywallBundle\Entity\Subscription", inversedBy="specification")
      * @ORM\JoinColumn(name="subscription_id", referencedColumnName="id")
      *
-     * @var Newscoop\PaywallBundle\Entity\Subscriptions
+     * @var Subscription
      */
     protected $subscription;
 

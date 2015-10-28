@@ -112,8 +112,6 @@ class HookController extends BaseController
             'articleLanguage' => $articleLanguage,
             'subscription' => $subscription,
         ));
-
-        return $this->returnResponse($form, $formSubscription, $success);
     }
 
     private function createSubscriptionForm(Subscription $subscription = null)

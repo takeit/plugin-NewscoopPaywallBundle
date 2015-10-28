@@ -172,7 +172,7 @@ class Subscription implements PriceableInterface
     /**
      * Get specification.
      *
-     * @return array
+     * @return ArrayCollection
      */
     public function getSpecification()
     {
