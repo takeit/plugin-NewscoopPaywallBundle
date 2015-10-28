@@ -46,8 +46,7 @@ class ManageSubscriptionsController extends Controller
             $em = $this->getDoctrine()->getManager();
             $subscription = $em->getRepository('Newscoop\PaywallBundle\Entity\Subscription')
                 ->findOneBy(array('id' => $id));
-            //$subscription->setIsActive(false);
-            $em->remove($subscription);
+            $subscription->setIsActive(false);
             $em->flush();
 
             return new Response(json_encode(array('status' => true)));
