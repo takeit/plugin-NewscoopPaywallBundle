@@ -14,6 +14,7 @@ use Newscoop\PaywallBundle\Form\Type\DurationType;
 use Newscoop\PaywallBundle\Form\Type\SubscriptionConfType;
 use Newscoop\PaywallBundle\Entity\Subscription;
 use Newscoop\Entity\Article;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class HookController extends BaseController
 {
