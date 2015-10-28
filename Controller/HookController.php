@@ -10,9 +10,9 @@ namespace Newscoop\PaywallBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Request;
-use Newscoop\PaywallBundle\Form\Type\HookType;
+use Newscoop\PaywallBundle\Form\Type\DurationType;
+use Newscoop\PaywallBundle\Form\Type\SubscriptionConfType;
 use Newscoop\PaywallBundle\Entity\Subscription;
-use Newscoop\PaywallBundle\Entity\Duration;
 use Newscoop\Entity\Article;
 
 class HookController extends BaseController
@@ -23,7 +23,7 @@ class HookController extends BaseController
      */
     public function sidebarAction(Request $request, $articleNumber, $articleLanguage)
     {
-        $form = $this->createForm(new HookType());
+        $form = $this->createForm(new DurationType());
         $em = $this->get('em');
         $success = false;
         $currencyProvider = $this->get('newscoop_paywall.currency_provider');
@@ -31,52 +31,93 @@ class HookController extends BaseController
 
         $article = $this->findOneOr404($articleNumber, $articleLanguage);
         $subscription = $this->findOneByArticle($article);
+        $subscriptionForm = $this->createSubscriptionForm($subscription);
         $form->handleRequest($request);
-        if ($form->get('saveSubmit')->isClicked()) {
-            if ($subscription) {
-                $subscription->setPrice($form->get('price')->getData());
+        if ($form->isValid()) {
+            $duration = $form->getData();
+            $durationEntity = $em->getRepository('Newscoop\PaywallBundle\Entity\Duration')
+                ->findOneBy(array(
+                    'value' => $duration->getValue(),
+                    'subscription' => $subscription->getId(),
+            ));
+
+            if (!$durationEntity) {
+                $duration->setSubscription($subscription);
+                $subscription->addRange($duration);
+
                 $success = true;
+                $em->flush();
             }
         }
 
-        if ($form->isValid()) {
-            $data = $form->getData();
+        return $this->returnResponse(array(
+            'form' => $form->createView(),
+            'subscriptionForm' => $subscriptionForm->createView(),
+            'success' => $success,
+            'currency' => $defaultCurrency->getCode(),
+            'articleNumber' => $articleNumber,
+            'articleLanguage' => $articleLanguage,
+            'subscription' => $subscription,
+        ));
+    }
+
+    /**
+     * @Route("/admin/paywall_plugin/sidebar/price/{articleNumber}/{articleLanguage}", options={"expose"=true})
+     * @Method("POST")
+     */
+    public function priceAction(Request $request, $articleNumber, $articleLanguage)
+    {
+        $form = $this->createForm(new DurationType());
+        $subscriptionForm = $this->createSubscriptionForm();
+        $em = $this->get('em');
+        $success = false;
+        $currencyProvider = $this->get('newscoop_paywall.currency_provider');
+        $defaultCurrency = $currencyProvider->getDefaultCurrency();
+
+        $article = $this->findOneOr404($articleNumber, $articleLanguage);
+        $subscription = $this->findOneByArticle($article);
+        $subscriptionForm->handleRequest($request);
+        if ($subscriptionForm->isValid()) {
+            $data = $subscriptionForm->getData();
             $subscriptionFactory = $this->get('newscoop_paywall.subscription.factory');
             $name = $this->getSubscriptionName($article);
-            $duration = $data['duration'];
             if (!$subscription) {
                 $parameters = array(
                     'object' => $article,
                     'name' => $name,
                     'type' => 'article',
-                    'price' => $data['price'],
+                    'price' => $data->getPrice(),
                     'currencyCode' => $defaultCurrency->getCode(),
-                    'duration' => $duration,
                 );
 
                 $subscription = $subscriptionFactory->createSubscription($parameters);
                 $em->persist($subscription);
             } else {
-                $duration->setSubscription($subscription);
-                $subscription->addRange($duration);
+                $subscription->setPrice($data->getPrice());
             }
 
             $success = true;
+            $em->flush();
+        } else {
+            $subscriptionForm = $this->createSubscriptionForm($subscription);
         }
 
-        $em->flush();
+        return $this->returnResponse(array(
+            'form' => $form->createView(),
+            'subscriptionForm' => $subscriptionForm->createView(),
+            'success' => $success,
+            'currency' => $defaultCurrency->getCode(),
+            'articleNumber' => $articleNumber,
+            'articleLanguage' => $articleLanguage,
+            'subscription' => $subscription,
+        ));
 
-        return $this->container->get('templating')->renderResponse(
-            'NewscoopPaywallBundle:Hook:sidebar.html.twig',
-            array(
-                'form' => $form->createView(),
-                'success' => $success,
-                'currency' => $defaultCurrency->getCode(),
-                'articleNumber' => $articleNumber,
-                'articleLanguage' => $articleLanguage,
-                'subscription' => $subscription,
-            )
-        );
+        return $this->returnResponse($form, $formSubscription, $success);
+    }
+
+    private function createSubscriptionForm(Subscription $subscription = null)
+    {
+        return $this->createForm(new SubscriptionConfType(), $subscription);
     }
 
     private function findOneOr404($articleNumber, $articleLanguage)
@@ -106,5 +147,13 @@ class HookController extends BaseController
     private function getSubscriptionName(Article $article)
     {
         return 'article-subscription-'.$article->getNumber().'-'.$article->getLanguageId();
+    }
+
+    private function returnResponse(array $data)
+    {
+        return $this->container->get('templating')->renderResponse(
+            'NewscoopPaywallBundle:Hook:sidebar.html.twig',
+            $data
+        );
     }
 }

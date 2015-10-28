@@ -11,7 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Newscoop\PaywallBundle\Validator\Constraints as PaywallValidators;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Gedmo\Translatable\Translatable;
 
 /**
  * Subscriptions entity.
@@ -20,7 +19,7 @@ use Gedmo\Translatable\Translatable;
  * @ORM\Table(name="plugin_paywall_subscriptions")
  * @Gedmo\TranslationEntity(class="SubscriptionTranslation")
  */
-class Subscription implements Translatable, PriceableInterface
+class Subscription implements PriceableInterface
 {
     /**
      * @ORM\Id()

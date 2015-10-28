@@ -17,7 +17,6 @@ class SubscriptionFactory implements SubscriptionFactoryInterface
 {
     public function createSubscription(array $data = array())
     {
-        $duration = $data['duration'];
         $subscription = new Subscription(
             $data['name'],
             $data['type'],
@@ -31,8 +30,11 @@ class SubscriptionFactory implements SubscriptionFactoryInterface
         );
 
         $subscription->addSpecification($specification);
-        $duration->setSubscription($subscription);
-        $subscription->addRange($duration);
+        if (array_key_exists('duration', $data) && isset($data['duration'])) {
+            $duration = $data['duration'];
+            $duration->setSubscription($subscription);
+            $subscription->addRange($duration);
+        }
 
         return $subscription;
     }

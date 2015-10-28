@@ -238,7 +238,7 @@
 											<td>{{ range.value }}{% if range.attribute == 'month' %} {{ 'paywall.label.months'|trans }} {% endif %}</td>
 											<td>{% if range.discount %} {{ range.discount.name}} ({{ range.discount.value * 100 }}%){% else %} - {% endif %}</td>
 											<td><button type="button" id="remove-duration" data-path="{{ path('newscoop_paywall_admin_duration_remove', {'id': range.id }) }}" class="btn btn-xs btn-danger">
-												<span class="glyphicon glyphicon-trash" aria-hidden="true"></span> {{ 'paywall.btn.delete'|trans }}
+												<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
 											</button></td>
 										</tr>
 										{% endfor %}
@@ -321,7 +321,7 @@
 						flashMessage('{{ 'paywall.success.removed'|trans }}');
 						that.parent().parent().remove();
 					} else {
-						flashMessage(data.message, "error");
+						flashMessage('{{ 'paywall.error.perioderror'|trans }}', 'error');
 					}
 				},
 				error: function (rq, status, error) {
