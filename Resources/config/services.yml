@@ -158,7 +158,7 @@ services:
 
     newscoop_paywall.hooks.listener:
         class: Newscoop\PaywallBundle\EventListener\HookListener
-        arguments: ["@service_container"]
+        arguments: ["@templating", "@em", "@newscoop_paywall.currency_provider", "@form.factory"]
         tags:
           - { name: kernel.event_listener, event: newscoop_admin.interface.article.edit.sidebar, method: sidebar }
 

@@ -16,30 +16,34 @@ use Newscoop\PaywallBundle\Form\Type\DurationType;
  */
 class HookListener
 {
-    private $container;
+    private $templating;
+    private $entityManager;
+    private $currencyProvider;
+    private $formFactory;
 
-    public function __construct($container)
+    public function __construct($templating, $entityManager, $currencyProvider, $formFactory)
     {
-        $this->container = $container;
+        $this->templating = $templating;
+        $this->entityManager = $entityManager;
+        $this->currencyProvider = $currencyProvider;
+        $this->formFactory = $formFactory;
     }
 
     public function sidebar(PluginHooksEvent $event)
     {
         $article = $event->getArgument('article');
-        $entityManager = $this->container->get('em');
-        $currencyProvider = $this->container->get('newscoop_paywall.currency_provider');
-        $defaultCurrency = $currencyProvider->getDefaultCurrency();
+        $defaultCurrency = $this->currencyProvider->getDefaultCurrency();
         $name = 'article-subscription-'.$article->getArticleNumber().'-'.$article->getLanguageId();
-        $subscription = $entityManager->getRepository('Newscoop\PaywallBundle\Entity\Subscription')
+        $subscription = $this->entityManager->getRepository('Newscoop\PaywallBundle\Entity\Subscription')
              ->getOneSubscription($article->getArticleNumber(), $name);
 
-        $form = $this->container->get('form.factory')->create(new DurationType());
-        $subscriptionForm = $this->container->get('form.factory')->create(
+        $form = $this->formFactory->create(new DurationType());
+        $subscriptionForm = $this->formFactory->create(
             new SubscriptionConfType(),
             $subscription
         );
 
-        $response = $this->container->get('templating')->renderResponse(
+        $response = $this->templating->renderResponse(
             'NewscoopPaywallBundle:Hook:sidebar.html.twig',
             array(
                 'form' => $form->createView(),
